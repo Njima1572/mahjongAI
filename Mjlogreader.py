@@ -1,4 +1,4 @@
-#Get Tehai from hai0, hai1, hai2, hai3
+# Get Tehai from hai0, hai1, hai2, hai3
 #Use T, U, V, W for Tsumos
 #Use D, E, F, G for Dahai
 #Keep track of hand and Shanten
@@ -45,19 +45,52 @@ class MjlogToCSV:
         self.file_to_write = file_to_write
         self.mjlog = open(self.file_to_open, "r")
         self.csv = open(self.file_to_write, "w")
+        self.text = self.mjlog.read()
 
     def getTehais(self):
-        hand = np.empty((4,34))
+        hand = np.zeros((4,34))
         discard = np.array(4)
-        text = self.mjlog.read()
+        text = self.text
         #p1 = re.compile(r'hai\d="\d+"')
-        #print(re.findall(r'hai\d="\d+"',text))
-        print(re.findall(r'<T\d+',text))
-        print(re.findall(r'hai\d+',text))
+        initialHands = []
+        for i in range(4):
+            Hand = re.findall('hai' + str(i) + '="(.+?)"',text)
+            Hand = [kyoku.split(",") for kyoku in Hand]
+            Hand = [[self.haiConverter(int(tile)) for tile in kyoku] for kyoku in Hand]
+            initialHands.append(Hand)
+        inits = []
+        for val in (re.finditer("<INIT", text)):
+            inits.append(val.span())
+        print(inits[0][0])
 
+        for i in range(len(inits)):
+            hand = np.zeros((4,34))
+            if(i < len(inits) -1):
+                text = self.text[inits[i][1]:inits[i+1][0]]
+            else:
+                text = self.text[inits[i][1]:]
+            p1Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<T\d+',text)]
+            p2Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<U\d+',text)]
+            p3Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<V\d+',text)]
+            p4Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<W\d+',text)]
+            p1Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<D\d+',text)]
+            p2Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<E\d+',text)]
+            p3Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<F\d+',text)]
+            p4Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<G\d+',text)]
+            Tsumos = [p2Tsumo, p2Tsumo, p3Tsumo, p4Tsumo]
+            Discards = [p1Discards, p2Discards, p3Discards, p4Discards]
+
+            for i in range(len(inits)):
+                for j in range(4):
+                    for k in range(len(initialHands[j][i])):
+                        hand[j][initialHands[j][i][k]] += 1
+                    for k in range(len(Tsumos[j])):
+                        hand[j][Tsumos[j][k]] += 1
+                        hand[j][Discards[j][k]] -= 1
+                        print(hand[j])
 
     def haiConverter(self, tile):
-        tile.value = tile.value / 4
+        tile = tile / 4
         return tile
 
 def main():

@@ -30,14 +30,13 @@ def readFile (filename):
 
 #builds the urls, accesses them and retrieves the data from them 
 #creates data files for every url 
-def writeFile (number_ids):
-    os.mkdir(number_ids)
+def writeFile (number_ids,foldername):   
     urls = []
     for i in range (np.size(number_ids)):
         new_html = 'http://tenhou.net/0/log/?2018' + number_ids[i]
         urls.append(new_html)
         data = requests.get(new_html)
-        with open("mjlogs/%s/mj_data_%s.txt" %(number_ids, i),'w') as out_f:
+        with open("mjlogs/%s/mj_data_%s.txt" %(foldername, i),'w') as out_f:
             out_f.write(data.text)
         print ( i+1,'File written')
 
@@ -46,6 +45,9 @@ directory = os.fsencode("./htmls/")
 for file in os.listdir(directory):
     filename = directory + os.fsencode(file)
     if filename.endswith(b".html"):
-        writeFile(readFile(filename))
+        if not os.path.exists("./mjlogs/%s"%filename[:-5]):
+            os.mkdir("./mjlogs/%s"%filename[:-5])
+
+        writeFile(readFile(filename),filename[:-5])
 
 

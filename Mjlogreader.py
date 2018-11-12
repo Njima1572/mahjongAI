@@ -99,6 +99,7 @@ class MjlogToCSV:
                 for k in range(smaller):
                     hand[player][Tsumos[player][k]] += 1
                     hand[player][Discards[player][k]] -= 1
+                    print(hand)
                     discard.append(Discards[player][k])
                     target = shanten.calculate_shanten(hand[player])
                 discards.append(discard)

@@ -37,7 +37,7 @@ Discards:
 """
 from mahjong.shanten import Shanten
 import numpy as np
-import re
+
 # File to Open should be mjlog
 # File to Write should be csv file
 class MjlogToCSV:
@@ -48,11 +48,13 @@ class MjlogToCSV:
         self.csv = open(self.file_to_write, "w")
         self.text = self.mjlog.read()
 
-    def getTehais(self):
+    def getTehais(self, foldername):
         hand = np.zeros((4,34))
         shanten = Shanten()
         discard = np.array(4)
         text = self.text
+        if(re.search('n3=""')):
+            return
         #p1 = re.compile(r'hai\d="\d+"')
         initialHands = []
         """for i in range(4):
@@ -66,7 +68,7 @@ class MjlogToCSV:
             inits.append(val.span())
 
         for i in range(len(inits)):
-            csvfile = open("csvs/data%d.csv"%(i),"w")
+            csvfile = open("csvs/%s%d.csv"%(filename,i),"w")
             hand = np.zeros((4,34))
             discards = []
             if(i < len(inits) -1):
@@ -75,6 +77,7 @@ class MjlogToCSV:
                 text = self.text[inits[i][1]:]
             for j in range(4):
                 Hand = re.findall('hai' + str(j) + '="(.+?)"',text)
+                
                 Hand = [kyoku.split(",") for kyoku in Hand]
                 Hand = [[self.haiConverter(int(tile)) for tile in kyoku] for kyoku in Hand]
                 for k in range(len(Hand[0])):
@@ -99,19 +102,33 @@ class MjlogToCSV:
                 for k in range(smaller):
                     hand[player][Tsumos[player][k]] += 1
                     hand[player][Discards[player][k]] -= 1
-                    print(hand)
                     discard.append(Discards[player][k])
                     target = shanten.calculate_shanten(hand[player])
+                    csvfile.write("%d"%target)
+                    for m in range(len(discard)):
+                        csvfile.write(",%s"%(discard[m]))
+                    csvfile.write("\n")
                 discards.append(discard)
-
+            csvfile.flush()
+            csvfile.close()
 
     def haiConverter(self, tile):
         tile = tile / 4
         return tile
 
+def txtParser():
+        directories = os.fsencode("./mjlogs/")
+        for directory in os.listdir(directories):
+            dirname = directory + os.fsencode(directory)
+            for file_ in os.listdir(dirname):
+                if file_.endswith(b".txt"):
+                    if not os.path.exists("./csvs/%s"%file_.decode('utf-8')[:-5]):
+                        os.mkdir("./csvs/%s"%file_.decode('utf-8')[:-5])
+                    print(file_)    
+    
 def main():
     mj = MjlogToCSV("mjlogs/sample2.mjlog", "test.csv")
-    mj.getTehais()
-
+    #mj.getTehais(filename)
+    txtParser()
 
 main()

@@ -53,7 +53,7 @@ class MjlogToCSV:
         shanten = Shanten()
         discard = np.array(4)
         text = self.text
-        
+        longest = 0
         if(re.search('n3=\"\"',text)):
             print("Sanma, Not going to Consider")
             return
@@ -114,7 +114,10 @@ class MjlogToCSV:
                     for m in range(len(discard)):
                         csvfile.write(",%s"%(discard[m]))
                     csvfile.write("\n")
+                if(longest < len(discard)):
+                    longest = len(discard)
                 discards.append(discard)
+        csvfile.write(longest)
         csvfile.flush()
         csvfile.close()
 

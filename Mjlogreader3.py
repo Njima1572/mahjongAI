@@ -53,21 +53,24 @@ class MjlogToCSV:
         shanten = Shanten()
         discard = np.array(4)
         text = self.text
+        
         if(re.search('n3=\"\"',text)):
+            print("Sanma, Not going to Consider")
             return
+        """
         #p1 = re.compile(r'hai\d="\d+"')
-        """for i in range(4):
+        for i in range(4):
             Hand = re.findall('hai' + str(i) + '="(.+?)"',text)
             Hand = [kyoku.split(",") for kyoku in Hand]
             Hand = [[self.haiConverter(int(tile)) for tile in kyoku] for kyoku in Hand]
             initialHands.append(Hand)
             """
+        csvfile = open("csvs/%s.csv"%(foldername),"w")
         inits = []
         for val in (re.finditer("<INIT", text)):
             inits.append(val.span())
 
         for i in range(len(inits)):
-            csvfile = open("csvs/%s%d.csv"%(foldername,i),"w")
             hand = np.zeros((4,34))
             discards = []
             if(i < len(inits) -1):
@@ -108,8 +111,8 @@ class MjlogToCSV:
                         csvfile.write(",%s"%(discard[m]))
                     csvfile.write("\n")
                 discards.append(discard)
-            csvfile.flush()
-            csvfile.close()
+        csvfile.flush()
+        csvfile.close()
 
     def haiConverter(self, tile):
         tile = tile / 4
@@ -138,13 +141,15 @@ def txtParser():
         for directory in os.listdir(directories):
 #            if os.path.isdir(directory.decode('utf-8')):
             dirname = directories + os.fsencode(directory + b"/")
+            mY_dir = "./csvs/" + directory.decode("utf-8")
+            if not os.path.exists(mY_dir):
+                os.mkdir(mY_dir)
+                
             for file_ in os.listdir(dirname):
                 if file_.endswith(b".txt"):
                     my_dir = directory.decode("utf-8") + "/" + file_.decode('utf-8')[:-5]
-                    if not os.path.exists(my_dir):
-                        os.makedirs(my_dir)
                     mj = MjlogToCSV((dirname + file_).decode('utf-8'))
-                    mj.getTehais(my_dir+"/")
+                    mj.getTehais(my_dir)
                     print(file_.decode('utf-8') + " Done!")
             print("Dir " + directory.decode('utf-8')+" Done!")
 def main():

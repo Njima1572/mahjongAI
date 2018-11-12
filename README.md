@@ -1,6 +1,6 @@
-###**Before starting anything,
+###Before starting anything,
 "pip install mahjong" 
-in your terminal.**
+in your terminal.
 
 Use "Mjlogreader3.py" with Python3.
 

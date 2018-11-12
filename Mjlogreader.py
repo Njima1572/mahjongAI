@@ -35,6 +35,7 @@ Discards:
 <F[Hai]/>
 <G[Hai]/>
 """
+from mahjong.shanten import Shanten
 import numpy as np
 import re
 # File to Open should be mjlog
@@ -49,6 +50,7 @@ class MjlogToCSV:
 
     def getTehais(self):
         hand = np.zeros((4,34))
+        shanten = Shanten()
         discard = np.array(4)
         text = self.text
         #p1 = re.compile(r'hai\d="\d+"')
@@ -61,10 +63,12 @@ class MjlogToCSV:
         inits = []
         for val in (re.finditer("<INIT", text)):
             inits.append(val.span())
-        print(inits[0][0])
 
         for i in range(len(inits)):
-            hand = np.zeros((4,34))
+            csvfile = open("csvs/data%d.csv"%(i),"w")
+            hand = self.initRound(initialHands, i)
+            discards = []
+            print(hand[0])
             if(i < len(inits) -1):
                 text = self.text[inits[i][1]:inits[i+1][0]]
             else:
@@ -77,18 +81,29 @@ class MjlogToCSV:
             p2Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<E\d+',text)]
             p3Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<F\d+',text)]
             p4Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<G\d+',text)]
-            Tsumos = [p2Tsumo, p2Tsumo, p3Tsumo, p4Tsumo]
+            Tsumos = [p1Tsumo, p2Tsumo, p3Tsumo, p4Tsumo]
             Discards = [p1Discards, p2Discards, p3Discards, p4Discards]
 
-            for i in range(len(inits)):
-                for j in range(4):
-                    for k in range(len(initialHands[j][i])):
-                        hand[j][initialHands[j][i][k]] += 1
-                    for k in range(len(Tsumos[j])):
-                        hand[j][Tsumos[j][k]] += 1
-                        hand[j][Discards[j][k]] -= 1
-                        print(hand[j])
-
+            for player in range(4):
+                discard = []
+                smaller = len(Tsumos[player])
+                if(len(Discards[player]) < len(Tsumos[player])):
+                    smaller = len(Discards[player])
+                for k in range(smaller):
+                    print("Round %d, %d Junme Player%d"%(i, k,player))
+                    hand[player][Tsumos[player][k]] += 1
+                    hand[player][Discards[player][k]] -= 1
+                    discard.append(Discards[player][k])
+                    target = shanten.calculate_shanten(hand[player])
+                    print("Shanten: %d"%target)
+                    print(hand[player])
+                discards.append(discard)
+    def initRound(self, initHands, round_number):
+        hand = np.zeros((4,34))
+        for i in range(4):
+            for j in range(len(initHands[i][round_number])):
+                hand[i][initHands[i][round_number][j]] += 1
+        return hand
     def haiConverter(self, tile):
         tile = tile / 4
         return tile

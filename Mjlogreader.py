@@ -37,6 +37,8 @@ Discards:
 """
 from mahjong.shanten import Shanten
 import numpy as np
+import os
+import re
 
 # File to Open should be mjlog
 # File to Write should be csv file
@@ -56,7 +58,6 @@ class MjlogToCSV:
         if(re.search('n3=""')):
             return
         #p1 = re.compile(r'hai\d="\d+"')
-        initialHands = []
         """for i in range(4):
             Hand = re.findall('hai' + str(i) + '="(.+?)"',text)
             Hand = [kyoku.split(",") for kyoku in Hand]
@@ -68,7 +69,7 @@ class MjlogToCSV:
             inits.append(val.span())
 
         for i in range(len(inits)):
-            csvfile = open("csvs/%s%d.csv"%(filename,i),"w")
+            csvfile = open("csvs/%s%d.csv"%(foldername,i),"w")
             hand = np.zeros((4,34))
             discards = []
             if(i < len(inits) -1):
@@ -119,15 +120,16 @@ class MjlogToCSV:
 def txtParser():
         directories = os.fsencode("./mjlogs/")
         for directory in os.listdir(directories):
-            dirname = directory + os.fsencode(directory)
+#            if os.path.isdir(directory.decode('utf-8')):
+            dirname = directories + os.fsencode(directory + b"/")
             for file_ in os.listdir(dirname):
                 if file_.endswith(b".txt"):
                     if not os.path.exists("./csvs/%s"%file_.decode('utf-8')[:-5]):
                         os.mkdir("./csvs/%s"%file_.decode('utf-8')[:-5])
-                    print(file_)    
+                    print(directory)    
     
 def main():
-    mj = MjlogToCSV("mjlogs/sample2.mjlog", "test.csv")
+    mj = MjlogToCSV("mjlogs/scc2018110500/mj_data_0.txt", "test.csv")
     #mj.getTehais(filename)
     txtParser()
 

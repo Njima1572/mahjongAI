@@ -31,13 +31,13 @@ def readFile (filename):
 #builds the urls, accesses them and retrieves the data from them 
 #creates data files for every url 
 def writeFile (number_ids):
-    
+    os.mkdir(number_ids)
     urls = []
     for i in range (np.size(number_ids)):
         new_html = 'http://tenhou.net/0/log/?2018' + number_ids[i]
         urls.append(new_html)
         data = requests.get(new_html)
-        with open("mjlogs/mj_data_%s.txt" % i,'w') as out_f:
+        with open("mjlogs/%s/mj_data_%s.txt" %(number_ids, i),'w') as out_f:
             out_f.write(data.text)
         print ( i+1,'File written')
 

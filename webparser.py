@@ -9,7 +9,7 @@ import re
 import numpy as np 
 import requests
 
-
+## gets the url id from files 
 def readFile (filename):
     
     try:
@@ -28,6 +28,8 @@ def readFile (filename):
 
 
 
+#builds the urls, accesses them and retrieves the data from them 
+#creates data files for every url 
 def writeFile (number_ids):
     
     urls = []

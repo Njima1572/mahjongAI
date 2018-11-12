@@ -8,10 +8,10 @@ Created on Sun Nov 11 14:38:20 2018
 import re
 import numpy as np 
 import requests
+import os
 
 ## gets the url id from files 
 def readFile (filename):
-    
     try:
         my_file=open(filename, 'r')
     except IOError:
@@ -41,6 +41,11 @@ def writeFile (number_ids):
             out_f.write(data.text)
         print ( i+1,'File written')
 
-        
-writeFile ( readFile('scc2018110500.html'))
+
+directory = os.fsencode("./htmls/")
+for file in os.listdir(directory):
+    filename = directory + os.fsencode(file)
+    if filename.endswith(b".html"):
+        writeFile(readFile(filename))
+
 

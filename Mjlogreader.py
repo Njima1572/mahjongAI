@@ -68,11 +68,11 @@ class MjlogToCSV:
             csvfile = open("csvs/data%d.csv"%(i),"w")
             hand = self.initRound(initialHands, i)
             discards = []
-            print(hand[0])
             if(i < len(inits) -1):
                 text = self.text[inits[i][1]:inits[i+1][0]]
             else:
                 text = self.text[inits[i][1]:]
+                print(text)
             p1Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<T\d+',text)]
             p2Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<U\d+',text)]
             p3Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<V\d+',text)]

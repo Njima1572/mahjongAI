@@ -73,10 +73,14 @@ class MjlogToCSV:
         for i in range(len(inits)):
             hand = np.zeros((4,34))
             discards = []
+        
             if(i < len(inits) -1):
                 text = self.text[inits[i][1]:inits[i+1][0]]
             else:
                 text = self.text[inits[i][1]:]
+            if(re.search('<N',text)):
+                #print("Naki, Not going to consider")
+                continue
             for j in range(4):
                 Hand = re.findall('hai' + str(j) + '="(.+?)"',text)
                 
@@ -123,7 +127,7 @@ Directory Tree
         . ------ mjlogs ----- [ids] - mj_data.txt
           |         
           |
-          ------ csvs ------ [ids] ------ [mj_data] ------ csv
+          ------ csvs ------ [ids] ------ [mj_data].csv
           |
           |
           ------ htmls ----- html
@@ -147,7 +151,7 @@ def txtParser():
                 
             for file_ in os.listdir(dirname):
                 if file_.endswith(b".txt"):
-                    my_dir = directory.decode("utf-8") + "/" + file_.decode('utf-8')[:-5]
+                    my_dir = directory.decode("utf-8") + "/" + file_.decode('utf-8')[:-4]
                     mj = MjlogToCSV((dirname + file_).decode('utf-8'))
                     mj.getTehais(my_dir)
                     print(file_.decode('utf-8') + " Done!")

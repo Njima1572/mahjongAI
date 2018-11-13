@@ -14,6 +14,7 @@ from sklearn.linear_model import Perceptron
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score
+from sklearn.ensemble import RandomForestClassifier
 #from sklearn.feature_extraction.text import CountVectorizer
 #from sklearn.feature_extraction.text import TfidfTransformer
 #from sklearn.pipeline import Pipeline
@@ -142,7 +143,7 @@ def main():
     """
     #TODO: add and test different SKLearn learning machines when learning model is finalized
 #Logistic Regression didn't converge
-    Machines_ = [SVC(kernel="rbf", gamma="auto"),Perceptron(max_iter=1000)]
+    Machines_ = [SVC(kernel="rbf", gamma="auto"), Perceptron(max_iter=1000), SGDClassifier(learning_rate="adaptive"), RandomForestClassifier()]
     for machine in Machines_:
         machinename = str(machine)[:str(machine).find("(")]
         mjML = mjMachineLearner(machine, os.fsencode("./csvs/"), metrics="MAE")

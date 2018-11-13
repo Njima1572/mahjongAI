@@ -40,7 +40,7 @@ svm = SVC(kernel='rbf', gamma="auto")
 
 for directory in os.listdir(directories):
     
-    if count > (train_value):
+    if count > (train_amount):
         break
     
     dirname = directories + os.fsencode(directory + b"/")

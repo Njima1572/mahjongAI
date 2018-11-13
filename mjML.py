@@ -108,7 +108,7 @@ class mjMachineLearner:
         loads the trainData joblib and currently utilizes f1_scores
         assumes data is in CSV format
         '''
-        #TODO: add a metric attribute to the class.
+        #TODO: add a metric attribute to the class, f1_score isn't accurate rn
         
         trainedMachine = joblib.load("%s.joblib"%(str(self.learningMachine)))
         scores = []
@@ -140,7 +140,7 @@ def main():
     currently creates a SVM mjML instance and passes in the local csvs directory
     to instantiate the machineLearner object to utilize the SVC model.
     """
-    #TODO: add and test different SKLearn learning machines
+    #TODO: add and test different SKLearn learning machines when learning model is finalized
     svm = SVC(kernel='rbf', gamma="auto")
     mjML = mjMachineLearner(svm, os.fsencode("./csvs/"))
     

@@ -48,11 +48,11 @@ class mjMachineLearner:
     #TODO: add default train ratio
     def __init__(self, learningMachine, directories, train_ratio = 0.7):
         self.learningMachine = learningMachine
-        self.trainRatio = train_ratio
+        self.train_ratio = train_ratio
         self.directories = directories
-        self.directory_length = len(os.listdir(directories))
-        self.train_amount = int(directory_length * train_ratio)
-        self.test_amount = directory_length - train_amount
+        self.directory_length = len(os.listdir(self.directories))
+        self.train_amount = int(self.directory_length * self.train_ratio)
+        self.test_amount = self.directory_length - self.train_amount
         
     
     def trainData(self, count = 0):
@@ -120,14 +120,14 @@ class mjMachineLearner:
                     f1_scores.append(mean_absolute_error(y_labels, prediction))
                     print(f1_scores)
         
-    def __main__():
+def main():
         """
         currently creates a SVM mjML instance and passes in the local csvs directory
         to instantiate the machineLearner object to utilize the SVC model.
         """
         #TODO: add and test different SKLearn learning machines
         svm = SVC(kernel='rbf', gamma="auto")
-        mjML = mhMachineLearner(svm, os.fsencode("./csvs/"))
+        mjML = mjMachineLearner(svm, os.fsencode("./csvs/"))
 
 if __name__=="__main__":
     main()

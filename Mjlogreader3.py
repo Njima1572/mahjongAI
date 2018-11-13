@@ -6,6 +6,8 @@
 #Junme, Tehai, Shanten, Sutehai
 
 """
+@author - Kochi Nakajima
+
 0 ~ 8 Manzu
 9 ~ 17 Pinzu
 18 ~ 26 Souzu
@@ -47,80 +49,120 @@ class MjlogToCSV:
         self.file_to_open = file_to_open
         self.mjlog = open(self.file_to_open, "r")
         self.text = self.mjlog.read()
+        self.shanten = Shanten()
 
-    def getTehais(self, foldername):
-        hand = np.zeros((4,34))
-        shanten = Shanten()
-        discard = np.array(4)
-        text = self.text
-        longest = 0
-        if(re.search('n3=\"\"',text)):
-            print("Sanma, Not going to Consider")
-            return
-        """
-        #p1 = re.compile(r'hai\d="\d+"')
-        for i in range(4):
-            Hand = re.findall('hai' + str(i) + '="(.+?)"',text)
-            Hand = [kyoku.split(",") for kyoku in Hand]
-            Hand = [[self.haiConverter(int(tile)) for tile in kyoku] for kyoku in Hand]
-            initialHands.append(Hand)
-            """
-        csvfile = open("csvs/%s.csv"%(foldername),"w")
+
+    """
+    Gets the positions for <INIT tag to keep track of games
+    """
+    def getInitTagPos(self, text):
         inits = []
         for val in (re.finditer("<INIT", text)):
             inits.append(val.span())
+        return inits
+
+    """
+    Cleans hand and discards
+    """
+    def initializeRound(self):
+        hand = np.zeros((4,34))
+        discards = []
+
+        return hand, discards
+
+    """
+    Get initial hand from given text
+    """
+    def retrieveHand(self, text):
+        hands = np.zeros((4,34))
+        for j in range(4):
+            Hand = re.findall('hai' + str(j) + '="(.+?)"',text)
+            Hand = [kyoku.split(",") for kyoku in Hand]
+            Hand = [[self.haiConverter(int(tile)) for tile in kyoku] for kyoku in Hand]
+            for k in range(len(Hand[0])):
+                hands[j][int(Hand[0][k])] += 1
+        return hands
+
+    """
+    Get tsumos of players from given text
+    """
+    def retrieveTsumo(self, text):
+        tsumos = []
+        tsumos.append([self.haiConverter(int(tile[2:])) for tile in re.findall(r'<T\d+',text)])
+        tsumos.append([self.haiConverter(int(tile[2:])) for tile in re.findall(r'<U\d+',text)])
+        tsumos.append([self.haiConverter(int(tile[2:])) for tile in re.findall(r'<V\d+',text)])
+        tsumos.append([self.haiConverter(int(tile[2:])) for tile in re.findall(r'<W\d+',text)])
+        return tsumos
+    """
+    Get discards of players from given text
+    """
+    def retrieveDiscards(self, text):
+        discards = []
+        discards.append([self.haiConverter(int(tile[2:])) for tile in re.findall(r'<D\d+',text)])
+        discards.append([self.haiConverter(int(tile[2:])) for tile in re.findall(r'<E\d+',text)])
+        discards.append([self.haiConverter(int(tile[2:])) for tile in re.findall(r'<F\d+',text)])
+        discards.append([self.haiConverter(int(tile[2:])) for tile in re.findall(r'<G\d+',text)])
+        return discards
+
+    """
+    Get text for a round_num round
+    """
+    def getRoundText(self, text, round_num, inits):
+        if(round_num < len(inits) - 1):
+            return text[inits[round_num][1]:inits[round_num+1][0]]
+        else:
+            return text[inits[round_num][1]:]
+    """
+    Writes info in a specific way into csv
+    Shanten | Discards
+    """
+    def writeToCSV(self, hands, tsumos, discards, csvfile):
+        for player in range(4):
+            discard = []
+            smaller = len(tsumos[player])
+            if(len(discards[player]) < len(tsumos[player])):
+                smaller = len(discards[player])
+            for k in range(smaller):
+                hands[player][tsumos[player][k]] += 1
+                hands[player][discards[player][k]] -= 1
+                discard.append(discards[player][k])
+                target = self.shanten.calculate_shanten(hands[player])
+                csvfile.write("%d"%target)
+                for m in range(len(discard)):
+                    csvfile.write(",%s"%(discard[m]))
+                csvfile.write("\n")
+
+    """
+    Checks if the game is Three people mahjong or not
+    """
+    def sanmaCheck(self):
+        if(re.search('n3=\"\"',self.text)):
+            return True
+    """
+    converts the mjlog into CSV file with specific format under /csvs/
+    """
+    def convertToCSV(self, foldername):
+        hand, discards = self.initializeRound()
+        csvfile = open("csvs/%s.csv"%(foldername),"w")
+        inits = self.getInitTagPos(self.text)
 
         for i in range(len(inits)):
-            hand = np.zeros((4,34))
             discards = []
-        
-            if(i < len(inits) -1):
-                text = self.text[inits[i][1]:inits[i+1][0]]
-            else:
-                text = self.text[inits[i][1]:]
+            text = self.getRoundText(self.text, i, inits)
             if(re.search('<N',text)):
                 #print("Naki, Not going to consider")
                 continue
-            for j in range(4):
-                Hand = re.findall('hai' + str(j) + '="(.+?)"',text)
-                
-                Hand = [kyoku.split(",") for kyoku in Hand]
-                Hand = [[self.haiConverter(int(tile)) for tile in kyoku] for kyoku in Hand]
-                for k in range(len(Hand[0])):
-                    hand[j][int(Hand[0][k])] += 1
 
-            p1Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<T\d+',text)]
-            p2Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<U\d+',text)]
-            p3Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<V\d+',text)]
-            p4Tsumo = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<W\d+',text)]
-            p1Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<D\d+',text)]
-            p2Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<E\d+',text)]
-            p3Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<F\d+',text)]
-            p4Discards = [self.haiConverter(int(tile[2:])) for tile in re.findall(r'<G\d+',text)]
-            Tsumos = [p1Tsumo, p2Tsumo, p3Tsumo, p4Tsumo]
-            Discards = [p1Discards, p2Discards, p3Discards, p4Discards]
-
-            for player in range(4):
-                discard = []
-                smaller = len(Tsumos[player])
-                if(len(Discards[player]) < len(Tsumos[player])):
-                    smaller = len(Discards[player])
-                for k in range(smaller):
-                    hand[player][Tsumos[player][k]] += 1
-                    hand[player][Discards[player][k]] -= 1
-                    discard.append(Discards[player][k])
-                    target = shanten.calculate_shanten(hand[player])
-                    csvfile.write("%d"%target)
-                    for m in range(len(discard)):
-                        csvfile.write(",%s"%(discard[m]))
-                    csvfile.write("\n")
-                if(longest < len(discard)):
-                    longest = len(discard)
-                discards.append(discard)
-        csvfile.write(str(longest))
+            hands = self.retrieveHand(text)
+            tsumos = self.retrieveTsumo(text)
+            discards = self.retrieveDiscards(text)
+            self.writeToCSV(hands, tsumos, discards, csvfile)
         csvfile.flush()
         csvfile.close()
 
+    """
+    Converts 136 into 34 tile types
+    """
     def haiConverter(self, tile):
         tile = tile / 4
         return int(tile)
@@ -128,7 +170,7 @@ class MjlogToCSV:
 """
 Directory Tree
         . ------ mjlogs ----- [ids] - mj_data.txt
-          |         
+          |
           |
           ------ csvs ------ [ids] ------ [mj_data].csv
           |
@@ -143,25 +185,22 @@ Directory Tree
           my_dir = "./csvs/[ids]/[mj_data]
 
 """
-def txtParser():
-        directories = os.fsencode("./mjlogs/")
-        for directory in os.listdir(directories):
-#            if os.path.isdir(directory.decode('utf-8')):
-            dirname = directories + os.fsencode(directory + b"/")
-            mY_dir = "./csvs/" + directory.decode("utf-8")
-            if not os.path.exists(mY_dir):
-                os.mkdir(mY_dir)
-                
-            for file_ in os.listdir(dirname):
-                if file_.endswith(b".txt"):
-                    my_dir = directory.decode("utf-8") + "/" + file_.decode('utf-8')[:-4]
-                    mj = MjlogToCSV((dirname + file_).decode('utf-8'))
-                    mj.getTehais(my_dir)
-                    print(file_.decode('utf-8') + " Done!")
-            print("Dir " + directory.decode('utf-8')+" Done!")
 def main():
-    #mj = MjlogToCSV("mjlogs/scc2018110500/mj_data_0.txt") 
-    #mj.getTehais(filename)
-    txtParser()
+    directories = os.fsencode("./mjlogs/")
+    for directory in os.listdir(directories):
+#            if os.path.isdir(directory.decode('utf-8')):
+        dirname = directories + os.fsencode(directory + b"/")
+        mY_dir = "./csvs/" + directory.decode("utf-8")
+        if not os.path.exists(mY_dir):
+            os.mkdir(mY_dir)
+
+        for file_ in os.listdir(dirname):
+            if file_.endswith(b".txt"):
+                my_dir = directory.decode("utf-8") + "/" + file_.decode('utf-8')[:-4]
+                mj = MjlogToCSV((dirname + file_).decode('utf-8'))
+                if not mj.sanmaCheck():
+                    mj.convertToCSV(my_dir)
+                print(file_.decode('utf-8') + " Done!")
+        print("Dir " + directory.decode('utf-8')+" Done!")
 
 main()

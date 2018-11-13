@@ -46,7 +46,7 @@ class mjMachineLearner:
     #test_amount = directory_length - train_amount -> worked out in init
     '''
     #TODO: add default train ratio
-    def __init__(self, learningMachine, train_ratio = 0.7, directories):
+    def __init__(self, learningMachine, directories, train_ratio = 0.7):
         self.learningMachine = learningMachine
         self.trainRatio = train_ratio
         self.directories = directories
@@ -128,6 +128,10 @@ class mjMachineLearner:
         #TODO: add and test different SKLearn learning machines
         svm = SVC(kernel='rbf', gamma="auto")
         mjML = mhMachineLearner(svm, os.fsencode("./csvs/"))
+
+if __name__=="__main__":
+    main()
+
         
 """
 backlog (delete once working):

@@ -45,6 +45,7 @@ class mjMachineLearner():
     #train_amount = int(directory_length * train_ratio) -> worked out in init
     #test_amount = directory_length - train_amount -> worked out in init
     '''
+    #TODO: add default train ratio
     def __init__(self, learningMachine, train_ratio = 0.7, directories):
         self.learningMachine = learningMachine
         self.trainRatio = train_ratio

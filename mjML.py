@@ -34,7 +34,7 @@ from sklearn.externals import joblib
 
 
 
-class mjMachineLearner():
+class mjMachineLearner:
     '''
     log:
     #should be a float number 0 < trian_ratio < 1

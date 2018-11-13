@@ -46,7 +46,7 @@ class mjMachineLearner:
     #test_amount = directory_length - train_amount -> worked out in init
     '''
     #TODO: add default train ratio
-    def __init__(self, learningMachine, directories, metrics = "MAE" ,train_ratio = 0.7):
+    def __init__(self, learningMachine, directories, metrics="MSE" ,train_ratio = 0.7):
         self.learningMachine = learningMachine
         self.train_ratio = train_ratio
         self.directories = directories
@@ -85,9 +85,9 @@ class mjMachineLearner:
                     X_ = df.iloc[:, 1:]
                     
                     self.learningMachine.fit(X_, y_labels)
-                    
-        joblib.dump(self.learningMachine, "%s.joblib"%(str(self.learningMachine)), compress=True)
-        print("%s trained, joblib created!")
+                    endindex = str(self.learningMachine).find('(')
+        joblib.dump(self.learningMachine, "%s.joblib"%(str(self.learningMachine)[:endindex]), compress=True)
+        print("%s trained, joblib created!"%str(self.learningMachine)[:endindex])
         
     def getScore(self, y_labels, prediction):
         if(self.metrics == "micro"):
@@ -97,11 +97,11 @@ class mjMachineLearner:
         elif(self.metrics == "mj"):
             return mjMetrics(y_labels,prediction)
         elif(self.metrics == "MAE"):
-            return mean_absolute_error(y_labels,prediction)
+            return 1 - mean_absolute_error(y_labels,prediction)/6
         elif(self.metrics == "MSE"):
-            return mean_squared_error(y_labels, prediction)
+            return 1 - mean_squared_error(y_labels, prediction)/6
         else:
-            return mean_absolute_error(y_labels,prediction)
+            return 1 - mean_absolute_error(y_labels,prediction)/6
 
     def testData(self, count = 0):
         '''
@@ -109,8 +109,9 @@ class mjMachineLearner:
         assumes data is in CSV format
         '''
         #TODO: add a metric attribute to the class, f1_score isn't accurate rn
+        endindex = str(self.learningMachine).find('(')
         
-        trainedMachine = joblib.load("%s.joblib"%(str(self.learningMachine)))
+        trainedMachine = joblib.load("%s.joblib"%(str(self.learningMachine)[:endindex]))
         scores = []
         
         for i in range(self.test_amount):
@@ -131,19 +132,23 @@ class mjMachineLearner:
                         continue
                     y_labels = df.iloc[:, 0]
                     X_ = df.iloc[:, 1:]
-                    prediction = self.learningMachine.predict(X_)
+                    prediction = trainedMachine.predict(X_)
                     scores.append(self.getScore(y_labels, prediction))
-                    print(scores)
-        
+        return scores 
 def main():
     """
     currently creates a SVM mjML instance and passes in the local csvs directory
     to instantiate the machineLearner object to utilize the SVC model.
     """
     #TODO: add and test different SKLearn learning machines when learning model is finalized
-    svm = SVC(kernel='rbf', gamma="auto")
-    mjML = mjMachineLearner(svm, os.fsencode("./csvs/"))
-    
+#Logistic Regression didn't converge
+    Machines_ = [SVC(kernel="rbf", gamma="auto"),Perceptron(max_iter=1000)]
+    for machine in Machines_:
+        machinename = str(machine)[:str(machine).find("(")]
+        mjML = mjMachineLearner(machine, os.fsencode("./csvs/"), metrics="MAE")
+        mjML.trainData()
+        scores = mjML.testData()
+        print("The average score for %s is : %.5f"%(machinename, np.average(scores)))
 if __name__=="__main__":
     main()
 

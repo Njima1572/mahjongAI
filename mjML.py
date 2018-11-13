@@ -46,10 +46,11 @@ class mjMachineLearner:
     #test_amount = directory_length - train_amount -> worked out in init
     '''
     #TODO: add default train ratio
-    def __init__(self, learningMachine, directories, train_ratio = 0.7):
+    def __init__(self, learningMachine, directories, metrics = "MAE" ,train_ratio = 0.7):
         self.learningMachine = learningMachine
         self.train_ratio = train_ratio
         self.directories = directories
+        self.metrics = metrics
         self.directory_length = len(os.listdir(self.directories))
         self.train_amount = int(self.directory_length * self.train_ratio)
         self.test_amount = self.directory_length - self.train_amount
@@ -88,6 +89,20 @@ class mjMachineLearner:
         joblib.dump(self.learningMachine, "%s.joblib"%(str(self.learningMachine)), compress=True)
         print("%s trained, joblib created!")
         
+    def getScore(self, y_labels, prediction):
+        if(self.metrics == "micro"):
+            return f1_score(y_labels,prediction, average="micro")
+        elif(self.metrics == "macro"):
+            return f1_score(y_labels,prediction, average="macro")
+        elif(self.metrics == "mj"):
+            return mjMetrics(y_labels,prediction)
+        elif(self.metrics == "MAE"):
+            return mean_absolute_error(y_labels,prediction)
+        elif(self.metrics == "MSE"):
+            return mean_squared_error(y_labels, prediction)
+        else:
+            return mean_absolute_error(y_labels,prediction)
+
     def testData(self, count = 0):
         '''
         loads the trainData joblib and currently utilizes f1_scores
@@ -117,11 +132,11 @@ class mjMachineLearner:
                     y_labels = df.iloc[:, 0]
                     X_ = df.iloc[:, 1:]
                     prediction = self.learningMachine.predict(X_)
-                    scores.append(mean_absolute_error(y_labels, prediction))
+                    scores.append(self.getScore(y_labels, prediction))
                     print(scores)
         
 def main():
-"""
+    """
     currently creates a SVM mjML instance and passes in the local csvs directory
     to instantiate the machineLearner object to utilize the SVC model.
     """

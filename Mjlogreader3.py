@@ -140,6 +140,7 @@ class MjlogToCSV:
             return True
     """
     converts the mjlog into CSV file with specific format under /csvs/
+   Csv file that is less than 10 bytes will be deleted here
     """
     def convertToCSV(self, foldername):
         hand, discards = self.initializeRound()

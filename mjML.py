@@ -18,10 +18,14 @@ from sklearn.metrics import f1_score
 #from sklearn.feature_extraction.text import TfidfTransformer
 #from sklearn.pipeline import Pipeline
 #from sklearn.model_selection import GridSearchCV 
+
+from metrics import mjMetrics
  
 #Metric tools
 from sklearn.metrics import classification_report
-
+from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
 #useful libs
 import os
 import pandas as pd
@@ -90,7 +94,7 @@ for i in range(test_amount):
             y_labels = df.iloc[:, 0]
             X_ = df.iloc[:, 1:]
             prediction = svm.predict(X_)
-            f1_scores.append(f1_score(y_labels, prediction, average = 'micro')*100)
+            f1_scores.append(mean_absolute_error(y_labels, prediction))
             #print( "a file has been tested!")
 
 print(f1_scores)

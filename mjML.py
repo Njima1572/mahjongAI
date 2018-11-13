@@ -28,15 +28,19 @@ import pandas as pd
 import numpy as np
 from sklearn.externals import joblib
 
+#should be a float number 0 < trian_ratio < 1
+train_ratio = 0.7
 count = 0
 directories = os.fsencode("./csvs/")
 directory_length=  len(os.listdir(directories))
+train_amount = int(directory_length * train_ratio)
+test_amount = directory_length - train_amount
 
 svm = SVC(kernel='rbf', gamma="auto")
 
 for directory in os.listdir(directories):
     
-    if count > (directory_length*0.7):
+    if count > (train_value):
         break
     
     dirname = directories + os.fsencode(directory + b"/")
@@ -63,9 +67,9 @@ joblib.dump(svm, "SVM-rbf.joblib", compress=True)
 svm = joblib.load("SVM-rbf.joblib")
 f1_scores = []
 
-for i in range(directory_length - count):
+for i in range(test_amount):
 
-    directory = os.listdir(directories)[count+i-1]
+    directory = os.listdir(directories)[train_amount + i]
     dirname = directories + os.fsencode(directory + b"/")
     count += 1
 

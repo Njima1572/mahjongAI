@@ -10,10 +10,10 @@ Created on Mon Nov 12 11:24:56 2018
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import SGDClassifier
-from sklearn import svm 
 from sklearn.linear_model import Perceptron 
 from sklearn.linear_model import LogisticRegression
- 
+from sklearn.svm import SVC
+from sklearn.metrics import f1_score
 #from sklearn.feature_extraction.text import CountVectorizer
 #from sklearn.feature_extraction.text import TfidfTransformer
 #from sklearn.pipeline import Pipeline
@@ -28,28 +28,64 @@ import os
 import pandas as pd
 import numpy as np
 
-#def txtParser():
-#        directories = os.fsencode("./csvs/")
-#        for directory in os.listdir(directories):
-##            if os.path.isdir(directory.decode('utf-8')):
-#            dirname = directories + os.fsencode(directory + b"/")
-#            mY_dir = "./csvs/" + directory.decode("utf-8")
-#            if not os.path.exists(mY_dir):
-#                os.mkdir(mY_dir)
-#                
-#            for file_ in os.listdir(dirname):
-#                if file_.endswith(b".txt"):
-#                    my_dir = directory.decode("utf-8") + "/" + file_.decode('utf-8')[:-4]
-#                    mj = MjlogToCSV((dirname + file_).decode('utf-8'))
-#                    mj.getTehais(my_dir)
-#                    print(file_.decode('utf-8') + " Done!")
-#            print("Dir " + directory.decode('utf-8')+" Done!")
-        
+count = 0
+directories = os.fsencode("./csvs/")
+directory_length=  len(os.listdir(directories))
 
-file = open("./csvs/scc2018110500/mj_data_0.csv", "r", encoding = "utf-8")
-file = file.read()
-number_of_col= int(file[-2:])
-columns = [i for i in range(number_of_col + 1)]
-df = pd.read_csv("./csvs/scc2018110500/mj_data_0.csv", delimiter=',', header= None, names = columns, engine = 'python', skipfooter = 1)
-print(df.head())
+svm = SVC ( kernel='rbf')
+
+for directory in os.listdir(directories):
+    
+    if count > (directory_length*0.7):
+        break
+    
+    dirname = directories + os.fsencode(directory + b"/")
+    count += 1
+
+    for file_ in os.listdir(dirname):
+        if file_.endswith(b".csv"):
+            
+            file = open((dirname + file_).decode('utf-8'), "r", encoding = "utf-8")
+            file = file.read()
+            columns = [i for i in range(20 + 1)]
+            df = pd.read_csv("./csvs/scc2018110500/mj_data_0.csv", delimiter=',', header= None, names = columns, engine = 'python', skipfooter = 1)
+            df = df.fillna(value=int(-1))
+
+            y_labels = df.iloc[:, 0]
+            X_ = df.iloc[:, 1:]
+            
+            svm.fit(X_, y_labels)
+            print( "a file has been trained!")
+            
+f1_scores = []
+
+for i in range(directory_length - count):
+
+    directory = os.listdir(directories)[count+i-1]
+    dirname = directories + os.fsencode(directory + b"/")
+    count += 1
+
+    for file_ in os.listdir(dirname):
+        if file_.endswith(b".csv"):
+            
+            file = open((dirname + file_).decode('utf-8'), "r", encoding = "utf-8")
+            file = file.read()
+            columns = [i for i in range(20 + 1)]
+            df = pd.read_csv("./csvs/scc2018110500/mj_data_0.csv", delimiter=',', header= None, names = columns, engine = 'python', skipfooter = 1)
+            df = df.fillna(value=int(-1))
+
+            y_labels = df.iloc[:, 0]
+            X_ = df.iloc[:, 1:]
+            
+            prediction = svm.predict(X_)
+            f1_scores.append(f1_score(y_labels, prediction, average = 'micro')*100)
+            print( "a file has been tested!")
+            
+    
+            
+      
+
+
+
+
 

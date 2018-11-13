@@ -43,11 +43,9 @@ import re
 # File to Open should be mjlog
 # File to Write should be csv file
 class MjlogToCSV:
-    def __init__(self, file_to_open, file_to_write):
+    def __init__(self, file_to_open):
         self.file_to_open = file_to_open
-        self.file_to_write = file_to_write
         self.mjlog = open(self.file_to_open, "r")
-        self.csv = open(self.file_to_write, "w")
         self.text = self.mjlog.read()
 
     def getTehais(self, foldername):
@@ -124,12 +122,13 @@ def txtParser():
             dirname = directories + os.fsencode(directory + b"/")
             for file_ in os.listdir(dirname):
                 if file_.endswith(b".txt"):
-                    if not os.path.exists("./csvs/%s"%file_.decode('utf-8')[:-5]):
-                        os.mkdir("./csvs/%s"%file_.decode('utf-8')[:-5])
-                    print(directory)    
-    
+                    my_dir = "./csvs/%s"%file_.decode('utf-8')[:-5]
+                    if not os.path.exists(my_dir):
+                        os.mkdir(my_dir)
+                    mj = MjlogToCSV(file_)
+                    mj.getTehais(my_dir)
 def main():
-    mj = MjlogToCSV("mjlogs/scc2018110500/mj_data_0.txt", "test.csv")
+    #mj = MjlogToCSV("mjlogs/scc2018110500/mj_data_0.txt") 
     #mj.getTehais(filename)
     txtParser()
 

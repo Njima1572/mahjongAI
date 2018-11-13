@@ -46,7 +46,7 @@ directory = os.fsencode("./htmls/")
 for file in os.listdir(directory):
     filename = directory + os.fsencode(file)
     if filename.endswith(b".html"):
-        if not os.path.exists("./mjlogs/%s"%file[:-5]):
+        if not os.path.exists("./mjlogs/%s"%file.decode('utf-8')[:-5]):
             os.mkdir("./mjlogs/%s"%file.decode('utf-8')[:-5])
 
         writeFile(readFile(filename),file.decode('utf-8')[:-5])

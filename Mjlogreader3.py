@@ -117,7 +117,7 @@ class MjlogToCSV:
                 if(longest < len(discard)):
                     longest = len(discard)
                 discards.append(discard)
-        csvfile.write(longest)
+        csvfile.write(str(longest))
         csvfile.flush()
         csvfile.close()
 

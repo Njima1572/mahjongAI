@@ -20,19 +20,19 @@ from sklearn.metrics import f1_score
 #from sklearn.model_selection import GridSearchCV 
  
 #Metric tools
-from sklearn import metrics
 from sklearn.metrics import classification_report
 
 #useful libs
 import os
 import pandas as pd
 import numpy as np
+from sklearn.externals import joblib
 
 count = 0
 directories = os.fsencode("./csvs/")
 directory_length=  len(os.listdir(directories))
 
-svm = SVC ( kernel='rbf')
+svm = SVC(kernel='rbf', gamma="auto")
 
 for directory in os.listdir(directories):
     
@@ -44,19 +44,22 @@ for directory in os.listdir(directories):
 
     for file_ in os.listdir(dirname):
         if file_.endswith(b".csv"):
-            
-            file = open((dirname + file_).decode('utf-8'), "r", encoding = "utf-8")
+            filename_str = (dirname + file_).decode('utf-8')
+            file = open(filename_str, "r", encoding = "utf-8")
             file = file.read()
             columns = [i for i in range(20 + 1)]
-            df = pd.read_csv("./csvs/scc2018110500/mj_data_0.csv", delimiter=',', header= None, names = columns, engine = 'python', skipfooter = 1)
+            df = pd.read_csv(filename_str, delimiter=',', header= None, names = columns, engine = 'python', skipfooter = 1)
             df = df.fillna(value=int(-1))
 
             y_labels = df.iloc[:, 0]
             X_ = df.iloc[:, 1:]
             
             svm.fit(X_, y_labels)
-            print( "a file has been trained!")
             
+joblib.dump(svm, "SVM-rbf.joblib", compress=True)
+"""
+
+svm = joblib.load("SVM-rbf.joblib")
 f1_scores = []
 
 for i in range(directory_length - count):
@@ -67,25 +70,24 @@ for i in range(directory_length - count):
 
     for file_ in os.listdir(dirname):
         if file_.endswith(b".csv"):
+            filename_str = (dirname + file_).decode('utf-8')
             
-            file = open((dirname + file_).decode('utf-8'), "r", encoding = "utf-8")
+            file = open(filename_str, "r", encoding = "utf-8")
             file = file.read()
             columns = [i for i in range(20 + 1)]
-            df = pd.read_csv("./csvs/scc2018110500/mj_data_0.csv", delimiter=',', header= None, names = columns, engine = 'python', skipfooter = 1)
+            df = pd.read_csv(filename_str, delimiter=',', header= None, names = columns, engine = 'python', skipfooter = 1)
             df = df.fillna(value=int(-1))
 
             y_labels = df.iloc[:, 0]
             X_ = df.iloc[:, 1:]
-            
             prediction = svm.predict(X_)
             f1_scores.append(f1_score(y_labels, prediction, average = 'micro')*100)
-            print( "a file has been tested!")
-            
+            #print( "a file has been tested!")
+
+print(f1_scores)
+            """
     
             
       
-
-
-
 
 

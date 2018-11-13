@@ -96,7 +96,7 @@ class mjMachineLearner:
         #TODO: add a metric attribute to the class.
         
         trainedMachine = joblib.load("%s.joblib"%(str(self.learningMachine)))
-        f1_scores = []
+        scores = []
         
         for i in range(self.test_amount):
         
@@ -117,18 +117,18 @@ class mjMachineLearner:
                     y_labels = df.iloc[:, 0]
                     X_ = df.iloc[:, 1:]
                     prediction = self.learningMachine.predict(X_)
-                    f1_scores.append(mean_absolute_error(y_labels, prediction))
-                    print(f1_scores)
+                    scores.append(mean_absolute_error(y_labels, prediction))
+                    print(scores)
         
 def main():
-        """
-        currently creates a SVM mjML instance and passes in the local csvs directory
-        to instantiate the machineLearner object to utilize the SVC model.
-        """
-        #TODO: add and test different SKLearn learning machines
-        svm = SVC(kernel='rbf', gamma="auto")
-        mjML = mjMachineLearner(svm, os.fsencode("./csvs/"))
-
+"""
+    currently creates a SVM mjML instance and passes in the local csvs directory
+    to instantiate the machineLearner object to utilize the SVC model.
+    """
+    #TODO: add and test different SKLearn learning machines
+    svm = SVC(kernel='rbf', gamma="auto")
+    mjML = mjMachineLearner(svm, os.fsencode("./csvs/"))
+    
 if __name__=="__main__":
     main()
 

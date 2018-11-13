@@ -93,7 +93,7 @@ class mjMachineLearner:
         loads the trainData joblib and currently utilizes f1_scores
         assumes data is in CSV format
         '''
-        #TODO: add a metric attribute to the class.
+        #TODO: add a metric attribute to the class, f1_score isn't accurate rn
         
         trainedMachine = joblib.load("%s.joblib"%(str(self.learningMachine)))
         scores = []

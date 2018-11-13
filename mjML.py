@@ -50,7 +50,8 @@ for directory in os.listdir(directories):
             columns = [i for i in range(20 + 1)]
             df = pd.read_csv(filename_str, delimiter=',', header= None, names = columns, engine = 'python', skipfooter = 1)
             df = df.fillna(value=int(-1))
-
+            if(len(df) < 2):
+                continue
             y_labels = df.iloc[:, 0]
             X_ = df.iloc[:, 1:]
             

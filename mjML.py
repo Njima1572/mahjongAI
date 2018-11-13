@@ -2,7 +2,7 @@
 """
 Created on Mon Nov 12 11:24:56 2018
 
-@author: p_giacominsanou
+@author: p_giacominsanou, k_nakajima, i_gutierrez
 """
  
 #Learning machines:
@@ -21,7 +21,7 @@ from sklearn.ensemble import RandomForestClassifier
 #from sklearn.model_selection import GridSearchCV 
 
 from metrics import mjMetrics
- 
+import imp 
 #Metric tools
 from sklearn.metrics import classification_report
 from sklearn.metrics import r2_score
@@ -143,13 +143,18 @@ def main():
     """
     #TODO: add and test different SKLearn learning machines when learning model is finalized
 #Logistic Regression didn't converge
-    Machines_ = [SVC(kernel="rbf", gamma="auto"), Perceptron(max_iter=1000), SGDClassifier(learning_rate="adaptive", eta="auto"), RandomForestClassifier()]
+    Machines_ = [SVC(kernel="rbf", gamma="auto"), Perceptron(max_iter=1000), SGDClassifier(learning_rate="adaptive", eta0=0.5, max_iter=1000), RandomForestClassifier(n_estimators=10)]
     for machine in Machines_:
         machinename = str(machine)[:str(machine).find("(")]
         mjML = mjMachineLearner(machine, os.fsencode("./csvs/"), metrics="MAE")
+        mjML2 = mjMachineLearner(machine, os.fsencode("./csvs/"), metrics="MSE")
         mjML.trainData()
+        mjML2.trainData()
+        
         scores = mjML.testData()
-        print("The average score for %s is : %.5f"%(machinename, np.average(scores)))
+        scores2 = mjML2.testData()
+        print("The average score with %s for %s is : %.5f"%(mjML.metrics, machinename, np.average(scores)))
+        print("The average score with %s for %s is : %.5f"%(mjML2.metrics, machinename, np.average(scores2)))
 if __name__=="__main__":
     main()
 
@@ -181,9 +186,7 @@ for directory in os.listdir(directories):
             X_ = df.iloc[:, 1:]
             
             svm.fit(X_, y_labels)
-            
-joblib.dump(svm, "SVM-rbf.joblib", compress=True)
-"""
+            joblib.dump(svm, "SVM-rbf.joblib", compress=True) """
 """
 old Test Data code:
 svm = joblib.load("SVM-rbf.joblib")

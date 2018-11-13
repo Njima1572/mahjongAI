@@ -143,7 +143,8 @@ class MjlogToCSV:
     """
     def convertToCSV(self, foldername):
         hand, discards = self.initializeRound()
-        csvfile = open("csvs/%s.csv"%(foldername),"w")
+        filename = "csvs/%s.csv"%(foldername)
+        csvfile = open(filename,"w")
         inits = self.getInitTagPos(self.text)
 
         for i in range(len(inits)):
@@ -159,6 +160,9 @@ class MjlogToCSV:
             self.writeToCSV(hands, tsumos, discards, csvfile)
         csvfile.flush()
         csvfile.close()
+        if(os.stat(filename).st_size < 10):
+            os.remove(filename)
+            print("Insignificant size, deleted")
 
     """
     Converts 136 into 34 tile types

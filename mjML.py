@@ -147,14 +147,13 @@ def main():
     for machine in Machines_:
         machinename = str(machine)[:str(machine).find("(")]
         mjML = mjMachineLearner(machine, os.fsencode("./csvs/"), metrics="MAE")
-        mjML2 = mjMachineLearner(machine, os.fsencode("./csvs/"), metrics="MSE")
         mjML.trainData()
-        mjML2.trainData()
-        
         scores = mjML.testData()
-        scores2 = mjML2.testData()
         print("The average score with %s for %s is : %.5f"%(mjML.metrics, machinename, np.average(scores)))
-        print("The average score with %s for %s is : %.5f"%(mjML2.metrics, machinename, np.average(scores2)))
+        mjML2 = mjMachineLearner(machine, os.fsencode("./csvs/"), metrics="MSE")
+        mjML2.trainData()
+        scores2 = mjML2.testData()
+        print("The average score with %s for %s is : %.6f"%(mjML2.metrics, machinename, np.average(scores2)))
 if __name__=="__main__":
     main()
 
